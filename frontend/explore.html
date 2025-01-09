@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Explore Books</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <script type="module" src="js/explore.js" defer></script>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Book Tracker</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="profile.html">Profile</a></li>
+                    <li class="nav-item"><a class="nav-link active" aria-current="page" href="explore.html">Explore</a></li>
+                    <li class="nav-item"><a class="nav-link" href="settings.html">Settings</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <h1>Explore Books</h1>
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <input type="text" class="form-control" id="searchBar" placeholder="Search by title or author">
+            </div>
+            <div class="col-md-3">
+                <select class="form-select" id="filterStatus">
+                    <option value="">Filter by Status</option>
+                    <option value="read">Read</option>
+                    <option value="to-read">To Read</option>
+                    <option value="reading">Reading</option>
+                </select>
+            </div>
+        </div>
+
+        <div id="bookList" class="row">
+            <!-- Books will be dynamically loaded here -->
+        </div>
+    </div>
+
+    <script type="module">
+        import { fetchBooks, addToPile } from './ts/explore.js';
+
+        const searchBar = document.getElementById('searchBar');
+        const filterStatus = document.getElementById('filterStatus');
+        const bookList = document.getElementById('bookList');
+
+        function renderBooks(books) {
+            bookList.innerHTML = books.map(book => `
+                <div class="col-md-4 mb-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">${book.title}</h5>
+                            <p class="card-text">Author: ${book.author}</p>
+                            <button class="btn btn-primary" onclick="addToPile('${book.id}', 'to-read')">To Read</button>
+                            <button class="btn btn-success" onclick="addToPile('${book.id}', 'reading')">Reading</button>
+                            <button class="btn btn-info" onclick="addToPile('${book.id}', 'read')">Read</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        fetchBooks().then(renderBooks);
+
+        searchBar.addEventListener('input', () => {
+            const query = searchBar.value.toLowerCase();
+            fetchBooks(query).then(renderBooks);
+        });
+
+        filterStatus.addEventListener('change', () => {
+            const status = filterStatus.value;
+            fetchBooks('', status).then(renderBooks);
+        });
+    </script>
+</body>
+</html>
